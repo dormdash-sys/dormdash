@@ -26,7 +26,7 @@
             flex: 1;
         }
         .logo {
-            max-width: 200px;
+            max-width: 300px; /* Increased from 200px */
             margin-bottom: 1rem;
         }
         h2 {
@@ -50,6 +50,10 @@
             border: none;
             font-size: 1rem;
             cursor: pointer;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
         }
         footer {
             background-color: #f8f8f8;
@@ -125,20 +129,20 @@
         <img src="https://i.imgur.com/Ydbd2Mh.png" alt="Dorm Dash Logo" class="logo">
         <h2>Need Papers printed?</h2>
         <h2>We can deliver them straight to you.</h2>
-        <form onsubmit="return emailSend();">
+        <form id="order-form" onsubmit="return emailSend();">
             <input type="text" id="name" placeholder="Name" name="name" required>
             <input type="email" id="email" placeholder="Email" name="email" required>
             <input type="text" id="dorm" placeholder="Dorm Address" name="dorm" required>
             <textarea id="items" placeholder="Items to Print/Deliver" name="items" rows="4" required></textarea>
             <textarea id="instructions" placeholder="Special Instructions" name="instructions" rows="2"></textarea>
-            <input type="url" id="file-link" placeholder="File Link (Optional, e.g., Google Drive, Outlook)" name="file-link">
-            <button type="submit">Submit Order</button>
+            <input type="url" id="file-link" placeholder="File Link (Google Drive, Outlook, etc.)" name="file-link" required>
+            <button type="submit" id="submit-btn">Submit Order</button>
         </form>
     </div>
     <footer>
         <div class="contact-info">
             <p><strong>Contact Us:</strong> dormdash24@gmail.com</p>
-            <p><a href="#" class="social-media" target="_blank">Instagram</a></p>
+            <p><a href="https://www.instagram.com/dormdash24/" class="social-media" target="_blank">Instagram</a></p>
         </div>
         <div class="footer-image">
             <a href="" target="_blank">
@@ -148,11 +152,21 @@
     </footer>
 
     <script>
+        let lastSubmissionTime = 0;
+        const cooldownPeriod = 10000; // 10 seconds in milliseconds
+
         function generateOrderNumber() {
             return 'DD-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substring(2, 5).toUpperCase();
         }
 
         function emailSend() {
+            const currentTime = Date.now();
+            if (currentTime - lastSubmissionTime < cooldownPeriod) {
+                const remainingTime = Math.ceil((cooldownPeriod - (currentTime - lastSubmissionTime)) / 1000);
+                swal("Slow down!", `Please wait ${remainingTime} seconds before submitting another order.`, "warning");
+                return false;
+            }
+
             var name = document.getElementById('name').value;
             var email = document.getElementById('email').value;
             var dorm = document.getElementById('dorm').value;
@@ -167,7 +181,7 @@
                 "<br/> Dorm Address: " + dorm + 
                 "<br/> Items: " + items + 
                 "<br/> Special Instructions: " + instructions +
-                "<br/> File Link: " + (fileLink ? fileLink : "No file link provided");
+                "<br/> File Link: " + fileLink;
             
             Email.send({
                 Host: "smtp.elasticemail.com",
@@ -182,17 +196,13 @@
                     if(message === "OK") {
                         showCheckmark();
                         swal("Great!", "Your order has been submitted successfully! Order number: " + orderNumber, "success");
+                        lastSubmissionTime = currentTime;
                     } else {
                         swal("Oops!", "Something went wrong. Please try again.", "error");
                     }
                 }
             );
-            document.getElementById('name').value = '';
-            document.getElementById('email').value = '';
-            document.getElementById('dorm').value = '';
-            document.getElementById('items').value = '';
-            document.getElementById('instructions').value = '';
-            document.getElementById('file-link').value = '';
+            document.getElementById('order-form').reset();
             return false;
         }
 
