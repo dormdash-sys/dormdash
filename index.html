@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dorm Dash - Paper Delivery Service</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .logo {
+            display: block;
+            margin: 0 auto 20px;
+            max-width: 100%;
+            height: auto;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        input, textarea {
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #ff6b6b;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #ff4757;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+    </style>
+    <script src="https://smtpjs.com/v3/smtp.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <img src="https://i.imgur.com/Ydbd2Mh.png" alt="Dorm Dash Logo" class="logo">
+        <h2>Need Papers printed?</h2>
+        <h2>We can deliver them straight to you.</h2>
+        <form onsubmit="return emailSend();">
+            <input type="text" id="name" placeholder="Name" name="name" required>
+            <input type="email" id="email" placeholder="Email" name="email" required>
+            <input type="text" id="dorm" placeholder="Dorm Address" name="dorm" required>
+            <textarea id="items" placeholder="Items to Print/Deliver" name="items" rows="4" required></textarea>
+            <textarea id="instructions" placeholder="Special Instructions" name="instructions" rows="2"></textarea>
+            <button type="submit">Submit Order</button>
+        </form>
+    </div>
+
+    <script>
+        function emailSend() {
+            var name = document.getElementById('name').value;
+            var email = document.getElementById('email').value;
+            var dorm = document.getElementById('dorm').value;
+            var items = document.getElementById('items').value;
+            var instructions = document.getElementById('instructions').value;
+
+            var messageBody = "Name: " + name +
+                "<br/> Email: " + email + 
+                "<br/> Dorm Address: " + dorm + 
+                "<br/> Items: " + items + 
+                "<br/> Special Instructions: " + instructions;
+            
+            Email.send({
+                Host: "smtp.elasticemail.com",
+                Username: "dormdash24@gmail.com",
+                Password: "361DDC60FDE459EC9B938362BE18AE163247",
+                To: 'dormdash24@gmail.com',
+                From: "dormdash24@gmail.com",
+                Subject: "New Dorm Dash Order",
+                Body: messageBody
+            }).then(
+                message => {
+                    if(message === "OK") {
+                        swal("Great!", "Your order has been submitted successfully!", "success");
+                    } else {
+                        swal("Oops!", "Something went wrong. Please try again.", "error");
+                    }
+                }
+            );
+
+            document.getElementById('name').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('dorm').value = '';
+            document.getElementById('items').value = '';
+            document.getElementById('instructions').value = '';
+
+            return false;
+        }
+    </script>
+</body>
+</html>
