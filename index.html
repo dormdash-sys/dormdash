@@ -151,82 +151,75 @@
     </footer>
 
     <script>
-        let lastSubmissionTime = 0;
-        const cooldownPeriod = 10000; // 10 seconds in milliseconds
+function emailSend() {
+    const currentTime = Date.now();
+    if (currentTime - lastSubmissionTime < cooldownPeriod) {
+        const remainingTime = Math.ceil((cooldownPeriod - (currentTime - lastSubmissionTime)) / 1000);
+        swal("Slow down!", `Please wait ${remainingTime} seconds before submitting another order.`, "warning");
+        return false;
+    }
 
-        function generateOrderNumber() {
-            return 'DD-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substring(2, 5).toUpperCase();
-        }
+    var name = document.getElementById('name').value;
+    var email = document.getElementById('email').value;
+    var dorm = document.getElementById('dorm').value;
+    var items = document.getElementById('items').value;
+    var instructions = document.getElementById('instructions').value;
+    var fileLink = document.getElementById('file-link').value;
+    var orderNumber = generateOrderNumber();
+    
+    var messageBody = "Order Number: " + orderNumber +
+        "<br/> Name: " + name +
+        "<br/> Email: " + email + 
+        "<br/> Dorm Address: " + dorm + 
+        "<br/> Items: " + items + 
+        "<br/> Special Instructions: " + instructions +
+        "<br/> File Link: " + fileLink;
+    
+    var customerMessageBody = "Instructions: When you pay us, please attach your order number in the notes of the payment that you are using, or else we will not deliver your product! Thank you! <br/> Our Venmo: [Your Venmo here]" +
+        "<br/><br/>Your order details:<br/>" + messageBody;
 
-        function emailSend() {
-            const currentTime = Date.now();
-            if (currentTime - lastSubmissionTime < cooldownPeriod) {
-                const remainingTime = Math.ceil((cooldownPeriod - (currentTime - lastSubmissionTime)) / 1000);
-                swal("Slow down!", `Please wait ${remainingTime} seconds before submitting another order.`, "warning");
-                return false;
-            }
-
-            var name = document.getElementById('name').value;
-            var email = document.getElementById('email').value;
-            var dorm = document.getElementById('dorm').value;
-            var items = document.getElementById('items').value;
-            var instructions = document.getElementById('instructions').value;
-            var fileLink = document.getElementById('file-link').value;
-            var orderNumber = generateOrderNumber();
-            
-            var messageBody = "Order Number: " + orderNumber +
-                "<br/> Name: " + name +
-                "<br/> Email: " + email + 
-                "<br/> Dorm Address: " + dorm + 
-                "<br/> Items: " + items + 
-                "<br/> Special Instructions: " + instructions +
-                "<br/> File Link: " + fileLink;
-            
-            Email.send({
-                Host: "smtp.elasticemail.com",
-                Username: "dormdash24@gmail.com",
-                Password: "361DDC60FDE459EC9B938362BE18AE163247",
-                To: 'dormdash24@gmail.com',
-                From: "dormdash24@gmail.com",
-                Subject: "New Dorm Dash Order: " + orderNumber,
-                Body: messageBody
-            })
-              Email.send({
-                Host: "smtp.mailersend.net",
-                Username: "MS_XYneQd@trial-z3m5jgr2dvxldpyo.mlsender.net",
-                Password: "4LkUjqQ8VuyVa6mp",
-                To: email,
-                From: "dormdash24@gmail.com",
-                Subject: "New Dorm Dash Order: " + orderNumber + "PLEASE READ",
-                Body: "Instructions: When you pay us, please attach your order number in the notes of the payment that you are using, or else we will not deliver your product! Thank you! <br/> Our Venmo:"
-            }).then(
-                message => {
-                    if(message === "OK") {
-                        showCheckmark();
-                        swal("Great!", "Your order has been submitted successfully! Order number: " + orderNumber, "success");
-                        lastSubmissionTime = currentTime;
-                    } else {
-                        swal("Oops!", "Something went wrong. Please try again.", "error");
+    // Send email to Dorm Dash using ElasticEmail
+    Email.send({
+        Host: "smtp.mailersend.net",
+            Username: "MS_XYneQd@trial-z3m5jgr2dvxldpyo.mlsender.net",
+            Password: "4LkUjqQ8VuyVa6mp",
+            To: "dormdash24@gmail.com",
+            From: "dormdash24@gmail.com",
+            Subject: "New Dorm Dash Order: " + orderNumber,
+            Body: messageBody,
+            Port: 587
+    }).then(
+        message => {
+            if(message === "OK") {
+                // If the first email is sent successfully, send the second email using MailerSend
+                Email.send({
+                    Host: "smtp.mailersend.net",
+                    Username: "MS_XYneQd@trial-z3m5jgr2dvxldpyo.mlsender.net",
+                    Password: "4LkUjqQ8VuyVa6mp",
+                    To: email,
+                    From: "dormdash24@gmail.com",
+                    Subject: "New Dorm Dash Order: " + orderNumber + " - PLEASE READ",
+                    Body: customerMessageBody,
+                    Port: 587 // Adding the port for MailerSend
+                }).then(
+                    message => {
+                        if(message === "OK") {
+                            showCheckmark();
+                            swal("Great!", "Your order has been submitted successfully! Order number: " + orderNumber, "success");
+                            lastSubmissionTime = currentTime;
+                        } else {
+                            swal("Oops!", "Something went wrong sending the confirmation email. Please contact us.", "warning");
+                        }
                     }
-                }
-            );
-            document.getElementById('order-form').reset();
-            return false;
+                );
+            } else {
+                swal("Oops!", "Something went wrong. Please try again.", "error");
+            }
         }
-
-        function showCheckmark() {
-            var checkmark = document.createElement('div');
-            checkmark.innerHTML = `
-                <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                    <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
-                    <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-                </svg>
-            `;
-            document.querySelector('.container').appendChild(checkmark);
-            setTimeout(() => {
-                checkmark.remove();
-            }, 3000);
-        }
+    );
+    document.getElementById('order-form').reset();
+    return false;
+}
     </script>
 </body>
 </html>
