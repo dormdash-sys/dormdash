@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dorm Dash - Paper Delivery Service</title>
     <script src="https://smtpjs.com/v3/smtp.js"></script>
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Fredoka+One&display=swap');
         
@@ -131,7 +130,7 @@
         <h2>We can deliver them straight to you.</h2>
         <form id="order-form" onsubmit="return emailSend();">
             <input type="text" id="name" placeholder="Name" name="name" required>
-            <input type="email" id="email" placeholder="Email" name="email" required>
+            <input type="email" id="email" placeholder="Email (important)" name="email" required>
             <input type="text" id="dorm" placeholder="Dorm Address" name="dorm" required>
             <textarea id="items" placeholder="Items to Print/Deliver" name="items" rows="4" required></textarea>
             <textarea id="instructions" placeholder="Special Instructions" name="instructions" rows="2"></textarea>
@@ -191,6 +190,15 @@
                 From: "dormdash24@gmail.com",
                 Subject: "New Dorm Dash Order: " + orderNumber,
                 Body: messageBody
+            })
+              Email.send({
+                Host: "smtp.mailersend.net",
+                Username: "MS_XYneQd@trial-z3m5jgr2dvxldpyo.mlsender.net",
+                Password: "4LkUjqQ8VuyVa6mp",
+                To: email,
+                From: "dormdash24@gmail.com",
+                Subject: "New Dorm Dash Order: " + orderNumber + "PLEASE READ",
+                Body: "Instructions: When you pay us, please attach your order number in the notes of the payment that you are using, or else we will not deliver your product! Thank you! <br/> Our Venmo:"
             }).then(
                 message => {
                     if(message === "OK") {
