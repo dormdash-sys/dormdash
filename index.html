@@ -153,61 +153,71 @@
         }
 
         function emailSend() {
-            var name = document.getElementById('name').value;
-            var email = document.getElementById('email').value;
-            var dorm = document.getElementById('dorm').value;
-            var items = document.getElementById('items').value;
-            var instructions = document.getElementById('instructions').value;
-            var fileLink = document.getElementById('file-link').value;
-            var orderNumber = generateOrderNumber();
-            
-            var messageBody = "Order Number: " + orderNumber +
-                "<br/> Name: " + name +
-                "<br/> Email: " + email + 
-                "<br/> Dorm Address: " + dorm + 
-                "<br/> Items: " + items + 
-                "<br/> Special Instructions: " + instructions +
-                "<br/> File Link: " + (fileLink ? fileLink : "No file link provided");
-            
-            Email.send({
-                Host: "smtp.elasticemail.com",
-                Username: "dormdash24@gmail.com",
-                Password: "361DDC60FDE459EC9B938362BE18AE163247",
-                To: 'dormdash24@gmail.com',
-                From: "dormdash24@gmail.com",
-                Subject: "New Dorm Dash Order: " + orderNumber,
-                Body: messageBody
-            }).then(
-                message => {
-                    if(message === "OK") {
-                        showCheckmark();
-                        swal("Great!", "Your order has been submitted successfully! Order number: " + orderNumber, "success");
-                    } else {
-                        swal("Oops!", "Something went wrong. Please try again.", "error");
-                    }
-                }
-            );
-            document.getElementById('name').value = '';
-            document.getElementById('email').value = '';
-            document.getElementById('dorm').value = '';
-            document.getElementById('items').value = '';
-            document.getElementById('instructions').value = '';
-            document.getElementById('file-link').value = '';
-            return false;
+    var name = document.getElementById('name').value;
+    var email = document.getElementById('email').value;
+    var dorm = document.getElementById('dorm').value;
+    var items = document.getElementById('items').value;
+    var instructions = document.getElementById('instructions').value;
+    var fileLink = document.getElementById('file-link').value;
+    var orderNumber = generateOrderNumber();
+    
+    var messageBody = "Order Number: " + orderNumber +
+        "<br/> Name: " + name +
+        "<br/> Email: " + email + 
+        "<br/> Dorm Address: " + dorm + 
+        "<br/> Items: " + items + 
+        "<br/> Special Instructions: " + instructions +
+        "<br/> File Link: " + (fileLink ? fileLink : "No file link provided");
+    
+    Email.send({
+        Host: "smtp.elasticemail.com",
+        Username: "dormdash24@gmail.com",
+        Password: "361DDC60FDE459EC9B938362BE18AE163247",
+        To: 'dormdash24@gmail.com',
+        From: "dormdash24@gmail.com",
+        Subject: "New Dorm Dash Order: " + orderNumber,
+        Body: messageBody
+    }).then(
+        message => {
+            if(message === "OK") {
+                showCheckmark(orderNumber);
+                swal({
+                    title: "Great!",
+                    text: "Your order has been submitted successfully! Order number: " + orderNumber + "\n\nPlease read the instructions below the checkmark carefully.",
+                    icon: "success",
+                    button: "OK",
+                });
+            } else {
+                swal("Oops!", "Something went wrong. Please try again.", "error");
+            }
         }
+    );
+    document.getElementById('name').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('dorm').value = '';
+    document.getElementById('items').value = '';
+    document.getElementById('instructions').value = '';
+    document.getElementById('file-link').value = '';
+    return false;
+}
 
-        function showCheckmark() {
-            var checkmark = document.createElement('div');
-            checkmark.innerHTML = `
-                <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                    <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
-                    <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-                </svg>
-            `;
-            document.querySelector('.container').appendChild(checkmark);
-            setTimeout(() => {
-            }, 3000);
-        }
+function showCheckmark(orderNumber) {
+    var checkmarkContainer = document.createElement('div');
+    checkmarkContainer.innerHTML = `
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+        <p style="text-align: center; font-weight: bold; margin-top: 20px;">Order Number: ${orderNumber}</p>
+        <p style="text-align: center; margin-top: 10px;">
+            Please pay to our Venmo: @YourVenmoHere<br>
+            Add your order number (${orderNumber}) in the payment notes.<br>
+            We will process your order once payment is received.
+        </p>
+    `;
+    checkmarkContainer.style.marginTop = '20px';
+    document.querySelector('.container').appendChild(checkmarkContainer);
+}
     </script>
 </body>
 </html>
