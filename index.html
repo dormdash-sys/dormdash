@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dorm Dash - Paper Delivery Service</title>
     <script src="https://smtpjs.com/v3/smtp.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Fredoka+One&display=swap');
-        
+
         body {
             font-family: 'Roboto', sans-serif;
             line-height: 1.6;
@@ -25,28 +26,11 @@
             flex: 1;
         }
         .logo {
+            max-width: 200px;
             max-width: 300px; /* Increased from 200px */
             margin-bottom: 1rem;
         }
         h2 {
-            font-family: 'Roboto', sans-serif;
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        input, textarea, button {
-            font-family: 'Fredoka One', cursive;
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #ff4d4d;
-            color: white;
-            border: none;
             font-size: 1rem;
             cursor: pointer;
         }
@@ -57,83 +41,18 @@
         footer {
             background-color: #f8f8f8;
             padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-        .contact-info {
-            text-align: left;
-            font-size: 0.8rem;
-        }
-        .contact-info p {
-            margin: 0;
-        }
-        .social-media a {
-            color: #333;
-            text-decoration: none;
-        }
-        .footer-image {
-            width: 100px;
-            height: 100px;
-        }
-        .footer-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .checkmark {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            display: block;
-            stroke-width: 2;
-            stroke: #4bb71b;
-            stroke-miterlimit: 10;
-            box-shadow: inset 0px 0px 0px #4bb71b;
-            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
-            position: relative;
-            top: 5px;
-            right: 5px;
-            margin: 0 auto;
-        }
-        .checkmark__circle {
-            stroke-dasharray: 166;
-            stroke-dashoffset: 166;
-            stroke-width: 2;
-            stroke-miterlimit: 10;
-            stroke: #4bb71b;
-            fill: #fff;
-            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
-        }
-        .checkmark__check {
-            transform-origin: 50% 50%;
-            stroke-dasharray: 48;
-            stroke-dashoffset: 48;
-            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
-        }
-        @keyframes stroke {
-            100% { stroke-dashoffset: 0; }
-        }
-        @keyframes scale {
-            0%, 100% { transform: none; }
-            50% { transform: scale3d(1.1, 1.1, 1); }
-        }
-        @keyframes fill {
-            100% { box-shadow: inset 0px 0px 0px 30px #4bb71b; }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
         <img src="https://i.imgur.com/Ydbd2Mh.png" alt="Dorm Dash Logo" class="logo">
         <h2>Need Papers printed?</h2>
         <h2>We can deliver them straight to you.</h2>
+        <form onsubmit="return emailSend();">
         <form id="order-form" onsubmit="return emailSend();">
             <input type="text" id="name" placeholder="Name" name="name" required>
-            <input type="email" id="email" placeholder="Email (important)" name="email" required>
+            <input type="email" id="email" placeholder="Email" name="email" required>
             <input type="text" id="dorm" placeholder="Dorm Address" name="dorm" required>
             <textarea id="items" placeholder="Items to Print/Deliver" name="items" rows="4" required></textarea>
             <textarea id="instructions" placeholder="Special Instructions" name="instructions" rows="2"></textarea>
+            <input type="url" id="file-link" placeholder="File Link (Optional, e.g., Google Drive, Outlook)" name="file-link">
+            <button type="submit">Submit Order</button>
             <input type="url" id="file-link" placeholder="File Link (Google Drive, Outlook, etc.)" name="file-link" required>
             <button type="submit" id="submit-btn">Submit Order</button>
         </form>
@@ -141,71 +60,53 @@
     <footer>
         <div class="contact-info">
             <p><strong>Contact Us:</strong> dormdash24@gmail.com</p>
+            <p><a href="#" class="social-media" target="_blank">Instagram</a></p>
             <p><a href="https://www.instagram.com/dormdash24/" class="social-media" target="_blank">Instagram</a></p>
         </div>
         <div class="footer-image">
             <a href="" target="_blank">
-                <img src="https://i.imgur.com/ZQsYgpn.png" alt="Footer Image">
-            </a>
-        </div>
     </footer>
 
     <script>
-function emailSend() {
-    const currentTime = Date.now();
-    if (currentTime - lastSubmissionTime < cooldownPeriod) {
-        const remainingTime = Math.ceil((cooldownPeriod - (currentTime - lastSubmissionTime)) / 1000);
-        swal("Slow down!", `Please wait ${remainingTime} seconds before submitting another order.`, "warning");
-        return false;
-    }
+        let lastSubmissionTime = 0;
+        const cooldownPeriod = 10000; // 10 seconds in milliseconds
+        function generateOrderNumber() {
+            return 'DD-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substring(2, 5).toUpperCase();
+        }
 
-    var name = document.getElementById('name').value;
-    var email = document.getElementById('email').value;
-    var dorm = document.getElementById('dorm').value;
-    var items = document.getElementById('items').value;
-    var instructions = document.getElementById('instructions').value;
-    var fileLink = document.getElementById('file-link').value;
-    var orderNumber = generateOrderNumber();
-    
-    var messageBody = "Order Number: " + orderNumber +
-        "<br/> Name: " + name +
-        "<br/> Email: " + email + 
-        "<br/> Dorm Address: " + dorm + 
-        "<br/> Items: " + items + 
-        "<br/> Special Instructions: " + instructions +
-        "<br/> File Link: " + fileLink;
-    
-    var customerMessageBody = "Instructions: When you pay us, please attach your order number in the notes of the payment that you are using, or else we will not deliver your product! Thank you! <br/> Our Venmo: [Your Venmo here]" +
-        "<br/><br/>Your order details:<br/>" + messageBody;
+        function emailSend() {
+            const currentTime = Date.now();
+            if (currentTime - lastSubmissionTime < cooldownPeriod) {
+                const remainingTime = Math.ceil((cooldownPeriod - (currentTime - lastSubmissionTime)) / 1000);
+                swal("Slow down!", `Please wait ${remainingTime} seconds before submitting another order.`, "warning");
+                return false;
+            }
+            var name = document.getElementById('name').value;
+            var email = document.getElementById('email').value;
+            var dorm = document.getElementById('dorm').value;
+                "<br/> Dorm Address: " + dorm + 
+                "<br/> Items: " + items + 
+                "<br/> Special Instructions: " + instructions +
+                "<br/> File Link: " + (fileLink ? fileLink : "No file link provided");
+                "<br/> File Link: " + fileLink;
 
-    // Send email to Dorm Dash using ElasticEmail
-    Email.send({
-            Host: "smtp.mailersend.net",
-            Username: "MS_XYneQd@trial-z3m5jgr2dvxldpyo.mlsender.net",
-            Password: "4LkUjqQ8VuyVa6mp",
-            To: "dormdash24@gmail.com",
-            From: "dormdash24@gmail.com",
-            Subject: "New Dorm Dash Order: " + orderNumber,
-            Body: messageBody
-    }).then(
-        message =>{
+            Email.send({
+                Host: "smtp.elasticemail.com",
                     if(message === "OK") {
                         showCheckmark();
                         swal("Great!", "Your order has been submitted successfully! Order number: " + orderNumber, "success");
                         lastSubmissionTime = currentTime;
                     } else {
-                            swal("Oops!", "Something went wrong sending the confirmation email. Please contact us.", "warning");
-                        }
+                        swal("Oops!", "Something went wrong. Please try again.", "error");
                     }
-                );
-            } else {
-                swal("Oops!", "Something went wrong. Please try again.", "error");
-            }
+                }
+            );
+            document.getElementById('name').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('dorm').value = '';
+            document.getElementById('items').value = '';
+            document.getElementById('instructions').value = '';
+            document.getElementById('file-link').value = '';
+            document.getElementById('order-form').reset();
+            return false;
         }
-    );
-    document.getElementById('order-form').reset();
-    return false;
-}
-    </script>
-</body>
-</html>
