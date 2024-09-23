@@ -180,14 +180,13 @@ function emailSend() {
 
     // Send email to Dorm Dash using ElasticEmail
     Email.send({
-        Host: "smtp.mailersend.net",
+            Host: "smtp.mailersend.net",
             Username: "MS_XYneQd@trial-z3m5jgr2dvxldpyo.mlsender.net",
             Password: "4LkUjqQ8VuyVa6mp",
             To: "dormdash24@gmail.com",
             From: "dormdash24@gmail.com",
             Subject: "New Dorm Dash Order: " + orderNumber,
-            Body: messageBody,
-            Port: 587
+            Body: messageBody
     }).then(
         message => {
             if(message === "OK") {
